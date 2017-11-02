@@ -177,8 +177,8 @@ function buildTazDataFromJson(tazs, options) {
       fulljson['features'] = [];
 
       for (let taz of tazs) {
-        if (taz.taz > 981) continue;
-        if (skipTazs.has(taz.taz)) continue;
+        //if (taz.taz > 981) continue;
+        //if (skipTazs.has(taz.taz)) continue;
 
         neighborhood[taz.taz] = taz.nhood;
         taz_acres[taz.taz] = 640.0 * taz.sq_mile;
@@ -604,7 +604,7 @@ function showDailyChart() {
 function pickPickup(thing) {
   app.isPickupActive = true;
   app.isDropoffActive = false;
-  chosenDir = 'pickups';
+  chosenDir = 'car';
 
   displayDetails();
   updateColors();
@@ -615,7 +615,7 @@ function pickPickup(thing) {
 function pickDropoff(thing) {
   app.isPickupActive = false;
   app.isDropoffActive = true;
-  chosenDir = 'dropoffs';
+  chosenDir = 'non car';
 
   displayDetails();
   updateColors();
@@ -725,7 +725,7 @@ function displayDetails() {
                  + (index ? (' at ' + hourLabels[index-1]) : '')
                  + ':';
     // Build 2nd line
-    app.details2 = trips.toLocaleString() + " citywide " + chosenDir;
+    app.details2 = trips.toLocaleString() + " energy used by " + chosenDir;
   }
   catch (error) {
     //eh, no big deal //console.log(error);

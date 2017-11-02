@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>TNCs TODAY</title>
+    <title>BEAM SIM DATA EXPLORER</title>
 
     <!-- FAVICONS -->
     <link rel="shortcut icon" href="http://www.sfcta.org/sites/all/themes/sfcta/favicon.ico" type="image/vnd.microsoft.icon" />
@@ -30,9 +30,9 @@
 
     <!-- FACEBOOK META -->
     <meta property="og:title"
-          content="Uber and Lyft Trip Visualizer for San Francisco" />
+          content="BEAM sim data explorer" />
     <meta property="og:description"
-          content="Ever wonder how many Uber and Lyft pickups and dropoffs are happening in your neighborhood? Explore the more than 200,000 trips taken every day in San Francisco." />
+          content="BEAM sim data explorer." />
     <meta property="og:image"
           content="http://tncstoday.sfcta.org/images/scrnshot.png" />
     <meta property="og:url"
@@ -57,7 +57,7 @@
       <div id="panel">
           <div id="header">
             <hr/>
-            <h3 class="apptitle">TNCs TODAY &raquo; DATA EXPLORER</h3>
+            <h3 class="apptitle">BEAM SIM DATA EXPLORER</h3>
               <div id="helpbar">
                 <button class="ui mini right labeled icon violet button"
                         @click="clickToggleHelp">
@@ -73,15 +73,15 @@
                 <hr/>
               </div>
             <div id="picker">
-                <h5>CHOOSE DIRECTION:</h5>
+                <h5>CHOOSE TRANSPORTATION MODE:</h5>
                 <button @click="pickPickup" v-bind:class="{ active: isPickupActive }"
                          class="mini ui inverted blue icon button">
                          <i class="icon arrow circle up"></i>
-                         Pick-ups</button>
+                         Car</button>
                 <button @click="pickDropoff" v-bind:class="{ active: isDropoffActive }"
                          class="mini ui inverted red icon button">
                          <i class="icon arrow circle down"></i>
-                         Drop-offs</button>
+                         Other</button>
                 <br/>
                 <h5 style="margin-top:10px">CHOOSE DAY OF WEEK:</h5>
                 <button v-for="(item, index) in days"
@@ -120,8 +120,8 @@
           <div class="logo">
             <hr/>
             <table id="table-logo"><tr>
-              <td class="td-logo"><h4 class="agency"><b><a target="_blank" href="http://www.sfcta.org/tncstoday">SAN FRANCISCO COUNTY TRANSPORTATION AUTHORITY</a></b></h4></td>
-              <td><a class="agency-link" target="_blank" href="http://www.sfcta.org/tncstoday"><img src="/images/sfcta-logo.png" width=60 height=60 ></img></a></td></tr>
+              <td class="td-logo"><h4 class="agency"><b><a target="_blank" href="http://beam.lbl.gov/">The Modeling Framework for Behavior, Energy, Autonomy, and Mobility</a></b></h4></td>
+              <td><a class="agency-link" target="_blank" href="http://beam.lbl.gov/"><img src="/images/logo.webp" width=60 height=60 ></img></a></td></tr>
             </table>
           </div>
         </div>
