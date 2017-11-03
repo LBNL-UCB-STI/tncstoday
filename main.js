@@ -8,7 +8,7 @@ import vueSlider from 'vue-slider-component';
 import Cookies from 'js-cookie';
 import JSZip from 'jszip';
 
-let api_server = 'https://api.sfcta.org/api/';
+let api_server = 'http://localhost:6600/api/';
 
 const TRIP_SCALING_FACTOR = 13.0;  // this scales the trips/sq.mile factor to match our color ramp
 
@@ -375,7 +375,7 @@ function createChart(data) {
     // A list of names of data record attributes that contain y-values.
     ykeys: ['pickups', 'dropoffs'],
     ymax: z,
-    labels: ['Pickups', 'Dropoffs'],
+    labels: ['Other', 'Car'],
 //    barColors: ["#3377cc","#cc3300",],
     barColors: ["#3377cc","#cc0033",],
     xLabels: "Hour",
@@ -428,7 +428,7 @@ let popup = null;
 
 function buildPopupTitle(trips) {
   let title = "<h3 id=\"popup-title\">" +
-              weekdays[day] + " in selected area:<br/>" + trips + " daily pickups & dropoffs</h3>"
+              weekdays[day] + " in selected area:<br/>" + trips + " daily Other & Car</h3>"
               //+chosenDir+"</h3>"
   return title;
 }

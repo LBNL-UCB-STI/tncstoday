@@ -77,11 +77,11 @@
                 <button @click="pickPickup" v-bind:class="{ active: isPickupActive }"
                          class="mini ui inverted blue icon button">
                          <i class="icon arrow circle up"></i>
-                         Car</button>
+                         Other</button>
                 <button @click="pickDropoff" v-bind:class="{ active: isDropoffActive }"
                          class="mini ui inverted red icon button">
                          <i class="icon arrow circle down"></i>
-                         Other</button>
+                         Car</button>
                 <br/>
                 <h5 style="margin-top:10px">CHOOSE DAY OF WEEK:</h5>
                 <button v-for="(item, index) in days"
