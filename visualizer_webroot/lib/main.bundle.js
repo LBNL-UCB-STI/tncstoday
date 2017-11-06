@@ -28614,6 +28614,30 @@ var detailsfordir = {
 }
 var label_pickups = 'Other';
 var label_dropoffs = 'Car';
+
+function updateLabels(json_conf) {
+
+    if (json_conf) {
+
+    var pickups = json_conf['pickups_label']
+    var dropoffs = json_conf['dropoffs_label']
+
+    label_pickups = pickups;
+    label_dropoffs = dropoffs;
+
+    detailsfordir['dropoffs'] = dropoffs;
+    detailsfordir['pickups'] = pickups
+
+    app.btn_pickups = pickups;
+    app.btn_dropoffs = dropoffs;
+
+    
+    }
+    
+
+}
+
+
 function dateFmt(x) {
   return hourLabels[x.x];
 }
@@ -28784,6 +28808,7 @@ var dailyChart = null;
 
 function showDailyChart() {
   var data = [];
+  var custom_ymax = 0;
 
   for (var h = 0; h < 24; h++) {
     var timeper = (h + 3) % 24; // %3 to start at 3AM
@@ -28791,8 +28816,13 @@ function showDailyChart() {
     var picks = dailyTotals[day][timeper]['pickups'];
     var drops = dailyTotals[day][timeper]['dropoffs'];
 
+    custom_ymax = Math.max(custom_ymax,  picks + drops);
+
     data.push({ hour: h, pickups: picks, dropoffs: drops });
   }
+
+
+    var z = Math.round(custom_ymax / 20) * 20 + 20;
 
   if (dailyChart) {
     dailyChart.options.labels = [app.isPickupActive ? label_pickups : label_dropoffs];
@@ -28809,7 +28839,7 @@ function showDailyChart() {
       xkey: 'hour',
       // A list of names of data record attributes that contain y-values.
       ykeys: [app.isPickupActive ? 'pickups' : 'dropoffs'],
-      ymax: maxHourlyTrips,
+      ymax: z,
       labels: [app.isPickupActive ? label_pickups : label_dropoffs],
       lineColors: [day < 5 ? '#1fc231' : '#ffe21f'],
       xLabels: "Hour",
@@ -29117,19 +29147,25 @@ function fetchZipFile() {
   }).then(function (content) {
     return new _jszip2.default().loadAsync(content);
   }).then(function (zzip) {
-    zzip.file('tnc_taz_totals.json').async('string').then(function (text) {
-      var json = JSON.parse(text);
-      tripTotals = calculateTripTotals(json);
 
-      zzip.file('taz_boundaries.json').async('string').then(function (text) {
-        var json = JSON.parse(text);
-        addTazLayer(json);
+    zzip.file('viz_configurations.json').async('string').then(function (text) {
+        var json_conf = JSON.parse(text);
+        updateLabels(json_conf)
 
-        zzip.file('tnc_trip_stats.json').async('string').then(function (text) {
+        zzip.file('tnc_taz_totals.json').async('string').then(function (text) {
           var json = JSON.parse(text);
-          buildDailyDetails(json);
+          tripTotals = calculateTripTotals(json);
+
+          zzip.file('taz_boundaries.json').async('string').then(function (text) {
+            var json = JSON.parse(text);
+            addTazLayer(json);
+
+            zzip.file('tnc_trip_stats.json').async('string').then(function (text) {
+              var json = JSON.parse(text);
+              buildDailyDetails(json);
+            });
+          });
         });
-      });
     });
   }).catch(function (error) {
     console.log("err: failed loading .zipfile, trying API instead; " + error);
@@ -29152,7 +29188,9 @@ var app = new Vue({
     details1: '',
     details2: '',
     nowMoloading: true,
-    isAllDay: true
+    isAllDay: true,
+    btn_pickups: '',
+    btn_dropoffs: ''
   },
   watch: {
     sliderValue: function sliderValue(value) {

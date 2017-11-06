@@ -17,10 +17,10 @@ object DeployTazViz extends App {
     val trip_totals = "tnc_taz_totals.json"
     val taz_boundarys = "taz_boundaries.json"
 
-    println("Project dir ${projectDir}")
+    //val currentDirectory = new java.io.File(".").getCanonicalPath
+    val viz_router = s"../visualizer_webroot/"
 
-    val rootzip = new java.util.zip.ZipFile(s"${args(0)}/db-files.zip")
-
+    val rootzip = new java.util.zip.ZipFile(viz_router+"/db-files.zip")
     val dd = rootzip.getEntry(trip_stats)
     val totalsTaz = rootzip.getEntry(trip_totals)
     val boundarys = rootzip.getEntry(taz_boundarys)
@@ -49,8 +49,8 @@ object DeployTazViz extends App {
 
     println("Finish Proccess...")
 
-    val dir = new File(args(0))
-    val port = args(1).toInt
+    val dir = new File(viz_router)
+    val port = args(0).toInt
     println("HTTPServer dir " + dir)
     println("HTTPServer port " + port)
 
