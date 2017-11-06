@@ -1,0 +1,36 @@
+group 'beam'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'scala'
+apply plugin: 'application'
+
+sourceCompatibility = 1.8
+
+repositories {
+    jcenter()
+    mavenLocal()
+    mavenCentral()
+    maven { url "https://plugins.gradle.org/m2/" }
+}
+
+def scalaBinaryVersion = "2.12"
+
+sourceSets.main.scala.srcDirs = ["src/main/scala", "src/main/java"]
+
+if (project.hasProperty('env')) {
+    sourceSets {
+        main {
+            resources {
+                srcDirs "src/main/resources", "test/input/" + project.getProperty('env')
+            }
+        }
+    }
+}
+
+dependencies {
+    compile "org.scala-lang:scala-library:${scalaBinaryVersion}"
+    compile group: 'com.typesafe.play', name: "play-json_${scalaBinaryVersion}", version: '2.6.3'
+    compile group: 'net.freeutils', name: 'jlhttp', version: '2.3'
+}
