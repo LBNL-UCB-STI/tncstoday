@@ -28341,6 +28341,9 @@ var taz_acres = [];
 // Create one giant GeoJSON layer. This should really be done in PostGIS, but I'm rushing.
 // See http://www.postgresonline.com/journal/archives/267-Creating-GeoJSON-Feature-Collections-with-JSON-and-PostGIS-functions.html
 function buildTazDataFromJson(tazs, options) {
+
+    updateColorRamp(tazs)
+
   // loop for the two directions
   for (var direction in jsonByDay) {
     // loop for each day of week
@@ -28371,8 +28374,12 @@ function buildTazDataFromJson(tazs, options) {
           if (taz.taz in tripTotals) {
             var trips = tripTotals[parseInt(taz.taz)][d];
             numTrips = trips[direction];
-            numTrips = TRIP_SCALING_FACTOR * numTrips / taz_acres[taz.taz];
+            //console.log("Scaling : " , numTrips );
+            numTrips = TRIP_SCALING_FACTOR * numTrips / taz_acres[taz.taz];            
+            
             shade = getColor(numTrips);
+
+            
             if (!shade) shade = '#222';
           }
           json['properties'] = {
@@ -28402,6 +28409,75 @@ function buildTazDataFromJson(tazs, options) {
     }
   }
   return jsonByDay;
+}
+
+function updateColorRamp(tazs) {
+    var taz_acres_t = [];
+    // loop for the two directions
+    var num_max = 0;
+    var num_mix = 10;
+    for (var direction in jsonByDay) {
+    // loop for each day of week
+        for (var d = 0; d < 7; d++) {
+
+            var _iteratorNormalCompletion = true;
+            var _didIteratorError = false;
+            var _iteratorError = undefined;
+
+            try {
+            for (var _iterator = tazs[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+                var taz = _step.value;
+
+                taz_acres_t[taz.taz] = 640.0 * taz.sq_mile;
+                var numTrips = 0;
+
+                if (taz.taz in tripTotals) {
+
+                    var trips = tripTotals[parseInt(taz.taz)][d];
+                    numTrips = trips[direction];
+                    //console.log("Scaling : " , numTrips );
+                    numTrips = TRIP_SCALING_FACTOR * numTrips / taz_acres_t[taz.taz];
+                    num_mix = Math.min(num_mix, numTrips);
+                    num_max = Math.max(num_max, numTrips);        
+                    
+                    
+                    
+                   
+                  }
+
+
+            }
+
+
+
+            }catch (err) {
+                _didIteratorError = true;
+                _iteratorError = err;
+              } finally {
+                try {
+                  if (!_iteratorNormalCompletion && _iterator.return) {
+                    _iterator.return();
+                  }
+                } finally {
+                  if (_didIteratorError) {
+                    throw _iteratorError;
+                  }
+                }
+            }
+        }
+    }
+    
+    updateArray(num_max);
+
+    
+}
+
+function updateArray(num_max) {    
+    var finalValue = Math.log(num_max);
+    for (var i = 1; i < 21; i++){
+        taColorRamp[i-1][0] = Math.round(Math.exp(((finalValue / 20) * i))); 
+
+    }
 }
 
 // these are the deets for painting the selected zone in 3D
@@ -28514,15 +28590,118 @@ var isCurrentLegendDaily = true;
 // See https://github.com/vuejs/vue/issues/1646
 function addLegend() {
   isCurrentLegendDaily = app.isAllDay;
+  console.log("LEGEND APp: ", app);
   var imgSrc = isCurrentLegendDaily ? '/images/legend-daily.png' : '/images/legend-hourly.png';
 
-  var legend = document.createElement('img');
-  legend.setAttribute('id', 'legend');
-  legend.setAttribute('src', imgSrc);
+  //var data_s = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"];
+  //var rango_s = ['#FBFCBD','#FCE3A7','#FFCD8F','#FFB57D','#FF9C6B','#FA815F','#F5695F','#E85462','#D6456B','#C23C76','#AB337D','#942B7F','#802482','#6A1C80','#55157D','#401073','#291057','#160D38','#0A081F','#0A081F'];
+  var data_s = [];
+  var rango_s = [];
 
-  // do it
+  if (app.isAllDay){
+
+    for (var i = 0; i < taColorRamp.length; i++) {
+        data_s[i] = taColorRamp[i][0];
+        rango_s[i] = taColorRamp[i][1];     
+    }
+
+  var legend = document.createElement('div');
+  legend.setAttribute('id', 'legend');
+  //legend.setAttribute('src', imgSrc);
+
   var mapElement = document.getElementById("sfmap");
   mapElement.appendChild(legend);
+
+  
+  var scale_o = d3.scale.quantile()
+              .domain([d3.min(data_s),d3.sum(data_s) / data_s.length,d3.max(data_s)])
+              .range(rango_s);
+  colorlegend("#legend", scale_o, "quantile", {title: "Daily Stats" , boxHeight: 600, boxWidth: 40});
+
+  /**
+  var scale_o = d3.scale.ordinal()
+              .domain(data_s)
+              .range(rango_s);
+  colorlegend("#legend", scale_o, "ordinal", {title: "Daily Stats" , boxHeight: 600, boxWidth: 40});
+    */
+
+
+  
+  var elementsGDOM = document.getElementsByTagName('g')[0].childNodes;
+
+  /**
+
+
+  for (var i = 0; i < elementsGDOM.length - 1; i++) {
+
+     
+
+      var title = document.createElement('title');
+      title.setAttribute("class","titleDisplayFixed");
+      var text = document.createTextNode('T');
+      title.appendChild(text);
+      elementsGDOM[i].childNodes[1].appendChild(title);
+
+
+      // add event listeners
+
+  }
+  */
+
+elementsGDOM.forEach(function(el) {
+        //el.addEventListener("touchstart", start);
+        el.addEventListener("mousedown",  start);
+
+        
+
+
+        //el.toElement.appendChild(title);
+
+        //el.addEventListener("touchmove",  move);
+        //el.addEventListener("mousemove",  move);
+})
+
+  /**
+
+  for (var i=0; i< elementsGDOM.childNodes.length - 1; i++){
+    var span = document.createElement('span');
+    span.setAttribute("class","tooltiptext");
+    var text = document.createTextNode("Valor : " + data_s[i-1]);
+    span.appendChild(text);
+    var div = document.createElement('div');
+    div.setAttribute("class", "tooltip");
+    div.appendChild(span);
+    var gNode = elementsGDOM.childNodes[i].cloneNode(true);
+    div.appendChild(gNode);
+
+    elementsGDOM.replaceChild(div,elementsGDOM.childNodes[i]);
+
+
+  }
+  */
+}
+
+
+
+  // do it
+  //var mapElement = document.getElementById("sfmap");
+  //mapElement.appendChild(legend);
+}
+
+function start(e){    
+    console.log(e);
+    var title = document.createElement('title');
+    title.setAttribute("class","titleDisplayFixed");
+    var text = document.createTextNode('Tempppp');
+    title.appendChild(text);
+    console.log(e.toElement);
+    e.toElement.appendChild(title);
+  // just an example
+}
+
+function move(e){
+  console.log(e);
+  // just an example
 }
 
 function updateLegend() {

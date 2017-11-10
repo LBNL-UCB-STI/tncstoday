@@ -3,9 +3,17 @@
   <head>
     <title>BEAM SIM DATA EXPLORER</title>
 
+
+
     <!-- FAVICONS -->
     <link rel="shortcut icon" href="http://www.sfcta.org/sites/all/themes/sfcta/favicon.ico" type="image/vnd.microsoft.icon" />
     <meta name="theme-color" content="#ffffff"/>
+
+    <!-- COLOR LEGEND -->
+    <script src="http://d3js.org/d3.v3.min.js"></script>
+    <script src="lib/colorlegend.js"></script>
+
+   
 
     <!-- VUE -->
     <!--    <script src="https://unpkg.com/vue"></script>-->
@@ -22,6 +30,10 @@
       integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8="
       crossorigin="anonymous"></script>
     <script src="semantic/semantic.min.js"></script>
+
+    
+
+    
 
     <!-- MORRIS CHARTS -->
     <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/morris.js/0.5.1/morris.css" />
@@ -117,7 +129,7 @@
             <vue-slider v-bind="timeSlider" v-model="sliderValue"></vue-slider>
           </div>
 
-          <div class="logo">
+            <div class="logo">             
             <hr/>
             <table id="table-logo"><tr>
               <td class="td-logo"><h4 class="agency"><b><a target="_blank" href="http://beam.lbl.gov/">The Modeling Framework for Behavior, Energy, Autonomy, and Mobility</a></b></h4></td>
