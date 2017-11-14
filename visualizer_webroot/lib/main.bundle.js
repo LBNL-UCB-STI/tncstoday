@@ -28473,9 +28473,9 @@ function updateColorRamp(tazs) {
 }
 
 function updateArray(num_max) {    
-    var finalValue = Math.log(num_max);
+    var finalValue = Math.log10(num_max);
     for (var i = 1; i < 21; i++){
-        taColorRamp[i-1][0] = Math.round(Math.exp(((finalValue / 20) * i))); 
+        taColorRamp[i-1][0] = Math.round(Math.pow(10,((finalValue / 20) * i))); 
 
     }
 }
@@ -28590,7 +28590,7 @@ var isCurrentLegendDaily = true;
 // See https://github.com/vuejs/vue/issues/1646
 function addLegend() {
   isCurrentLegendDaily = app.isAllDay;
-  console.log("LEGEND APp: ", app);
+  
   var imgSrc = isCurrentLegendDaily ? '/images/legend-daily.png' : '/images/legend-hourly.png';
 
   //var data_s = ["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20"];
@@ -28598,7 +28598,7 @@ function addLegend() {
   var data_s = [];
   var rango_s = [];
 
-  if (app.isAllDay){
+  if (true){ //Change for hourly
 
     for (var i = 0; i < taColorRamp.length; i++) {
         data_s[i] = taColorRamp[i][0];
@@ -28616,7 +28616,7 @@ function addLegend() {
   var scale_o = d3.scale.quantile()
               .domain([d3.min(data_s),d3.sum(data_s) / data_s.length,d3.max(data_s)])
               .range(rango_s);
-  colorlegend("#legend", scale_o, "quantile", {title: "Daily Stats" , boxHeight: 600, boxWidth: 40});
+  colorlegend("#legend", scale_o, "quantile", {title: "Transportation energy comsumption (1000s megajule ? per sq_mile)" , boxHeight: 600, boxWidth: 40});
 
   /**
   var scale_o = d3.scale.ordinal()
@@ -28629,80 +28629,24 @@ function addLegend() {
   
   var elementsGDOM = document.getElementsByTagName('g')[0].childNodes;
 
-  /**
+  
 
 
   for (var i = 0; i < elementsGDOM.length - 1; i++) {
-
-     
-
-      var title = document.createElement('title');
-      title.setAttribute("class","titleDisplayFixed");
-      var text = document.createTextNode('T');
-      title.appendChild(text);
-      elementsGDOM[i].childNodes[1].appendChild(title);
-
-
-      // add event listeners
-
+      elementsGDOM[i].setAttribute("data-toggle","tooltip");      
+      elementsGDOM[i].setAttribute("title",data_s[i]);
   }
-  */
 
-elementsGDOM.forEach(function(el) {
-        //el.addEventListener("touchstart", start);
-        el.addEventListener("mousedown",  start);
-
-        
-
-
-        //el.toElement.appendChild(title);
-
-        //el.addEventListener("touchmove",  move);
-        //el.addEventListener("mousemove",  move);
-})
-
-  /**
-
-  for (var i=0; i< elementsGDOM.childNodes.length - 1; i++){
-    var span = document.createElement('span');
-    span.setAttribute("class","tooltiptext");
-    var text = document.createTextNode("Valor : " + data_s[i-1]);
-    span.appendChild(text);
-    var div = document.createElement('div');
-    div.setAttribute("class", "tooltip");
-    div.appendChild(span);
-    var gNode = elementsGDOM.childNodes[i].cloneNode(true);
-    div.appendChild(gNode);
-
-    elementsGDOM.replaceChild(div,elementsGDOM.childNodes[i]);
-
-
-  }
-  */
-}
-
-
-
+  $(document).ready(function(){
+    $('[data-toggle="tooltip"]').tooltip(); 
+    });
+    }
   // do it
   //var mapElement = document.getElementById("sfmap");
   //mapElement.appendChild(legend);
 }
 
-function start(e){    
-    console.log(e);
-    var title = document.createElement('title');
-    title.setAttribute("class","titleDisplayFixed");
-    var text = document.createTextNode('Tempppp');
-    title.appendChild(text);
-    console.log(e.toElement);
-    e.toElement.appendChild(title);
-  // just an example
-}
 
-function move(e){
-  console.log(e);
-  // just an example
-}
 
 function updateLegend() {
   // skip, if we already have the correct legend
@@ -28722,8 +28666,10 @@ function buildChartDataFromJson(json) {
   for (var h = 0; h < 24; h++) {
     var record = json[(h + 3) % 24]; // %3 to start at 3AM
     var hour = Number(record.time.substring(0, 2));
-    var picks = Number(record.pickups);
-    var drops = Number(record.dropoffs);
+    //var picks = Number(record.pickups);
+    //var drops = Number(record.dropoffs);
+    var picks = record.pickups;
+    var drops = record.dropoffs;
 
     data.push({ hour: hour, pickups: picks, dropoffs: drops });
   }
@@ -28783,7 +28729,8 @@ function createChart(data) {
 }
 
 function yFmt(y) {
-  return Math.round(y).toLocaleString();
+  //return Math.round(y).toLocaleString(); return without decimal numbers
+  return y.toLocaleString();
 }
 
 var hourLabels = ['3 AM', '4 AM', '5 AM', '6 AM', '7 AM', '8 AM', '9 AM', '10 AM', '11 AM', 'Noon', '1 PM', '2 PM', '3 PM', '4 PM', '5 PM', '6 PM', '7 PM', '8 PM', '9 PM', '10 PM', '11 PM', '12 AM', '1 AM', '2 AM'];
