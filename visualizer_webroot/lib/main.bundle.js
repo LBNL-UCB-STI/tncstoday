@@ -28215,7 +28215,7 @@ var mymap = new mapboxgl.Map({
 
 // no ubers on the farallon islands (at least, not yet)
 var skipTazs = new Set([384, 385, 313, 305]);
-var weekdays = ['Mondays', 'Tuesdays', 'Wednesdays', 'Thursdays', 'Fridays', 'Saturdays', 'Sundays'];
+var weekdays = [];
 
 var colorRamp1 = [[10, '#FBFCBD'], [20, '#FCE3A7'], [30, '#FFCD8F'], [40, '#FFB57D'], [50, '#FF9C6B'], [75, '#FA815F'], [100, '#F5695F'], [125, '#E85462'], [150, '#D6456B'], [175, '#C23C76'], [200, '#AB337D'], [225, '#942B7F'], [250, '#802482'], [300, '#6A1C80'], [350, '#55157D'], [400, '#401073'], [500, '#291057'], [750, '#160D38'], [1000, '#0A081F'], [1800, '#000005']];
 
@@ -28347,7 +28347,7 @@ function buildTazDataFromJson(tazs, options) {
   // loop for the two directions
   for (var direction in jsonByDay) {
     // loop for each day of week
-    for (var d = 0; d < 7; d++) {
+    for (var d = 0; d < app.days.length; d++) {
       var fulljson = {};
       fulljson['type'] = 'FeatureCollection';
       fulljson['features'] = [];
@@ -28418,7 +28418,7 @@ function updateColorRamp(tazs) {
     var num_mix = 10;
     for (var direction in jsonByDay) {
     // loop for each day of week
-        for (var d = 0; d < 7; d++) {
+        for (var d = 0; d < app.days.length; d++) {
 
             var _iteratorNormalCompletion = true;
             var _didIteratorError = false;
@@ -28605,6 +28605,11 @@ function addLegend() {
         rango_s[i] = taColorRamp[i][1];     
     }
 
+
+  var dataRefactor = scaleRefactor(data_s);
+
+  //console.log("Scale Refactor : ", dataRefactor);
+
   var legend = document.createElement('div');
   legend.setAttribute('id', 'legend');
   //legend.setAttribute('src', imgSrc);
@@ -28612,21 +28617,22 @@ function addLegend() {
   var mapElement = document.getElementById("sfmap");
   mapElement.appendChild(legend);
 
-  
+  /**
   var scale_o = d3.scale.quantile()
               .domain([d3.min(data_s),d3.sum(data_s) / data_s.length,d3.max(data_s)])
               .range(rango_s);
-  colorlegend("#legend", scale_o, "quantile", {title: "Transportation energy comsumption (1000s megajule ? per sq_mile)" , boxHeight: 600, boxWidth: 40});
+  colorlegend("#legend", scale_o, "quantile", {title: color_scale_label , boxHeight: 600, boxWidth: 40});
+*/
+  
+  var scale_o = d3.scale.ordinal()
+              .domain(dataRefactor)
+              .range(rango_s);
+  colorlegend("#legend", scale_o, "ordinal", {title: color_scale_label , boxHeight: 800, boxWidth: 40});
+
+
 
   /**
-  var scale_o = d3.scale.ordinal()
-              .domain(data_s)
-              .range(rango_s);
-  colorlegend("#legend", scale_o, "ordinal", {title: "Daily Stats" , boxHeight: 600, boxWidth: 40});
-    */
-
-
-  
+  Tooltip Scale
   var elementsGDOM = document.getElementsByTagName('g')[0].childNodes;
 
   
@@ -28640,10 +28646,26 @@ function addLegend() {
   $(document).ready(function(){
     $('[data-toggle="tooltip"]').tooltip(); 
     });
+
+    **/
     }
   // do it
   //var mapElement = document.getElementById("sfmap");
   //mapElement.appendChild(legend);
+}
+
+function scaleRefactor(scale) {
+    var result = [];
+
+    for (var i = 0; i < scale.length; i++) {
+        var r = scale[i]/1000;
+        if (r >= 1)
+            result[i] = Math.ceil(r) + "k";
+        else
+            result[i] = scale[i].toString();
+    }
+
+    return result;
 }
 
 
@@ -28741,22 +28763,34 @@ var detailsfordir = {
 var label_pickups = 'Other';
 var label_dropoffs = 'Car';
 
+var color_scale_label = "Transportation energy comsumption (1000s megajule ? per sq_mile)";
+
+var stats_detail = " ";
+
 function updateLabels(json_conf) {
 
     if (json_conf) {
 
     var pickups = json_conf['pickups_label']
     var dropoffs = json_conf['dropoffs_label']
-
     label_pickups = pickups;
     label_dropoffs = dropoffs;
-
     detailsfordir['dropoffs'] = dropoffs;
     detailsfordir['pickups'] = pickups
-
     app.btn_pickups = pickups;
-    app.btn_dropoffs = dropoffs;
-
+    app.btn_dropoffs = dropoffs;   
+    helpPanel.modal_title = json_conf['modal_title'];
+    helpPanel.modal_content = json_conf['modal_content'];
+    document.title = json_conf['right_panel_title'];
+    app.right_panel_title = json_conf['right_panel_title'];
+    app.right_panel_choose_mode = json_conf['right_panel_choose_mode'];
+    app.right_panel_choose_day = json_conf['right_panel_choose_day'];
+    app.right_panel_stats_tittle = json_conf['right_panel_stats_tittle'];
+    app.right_panel_footer = json_conf['right_panel_footer'];
+    color_scale_label = json_conf['color_scale_label'];
+    app.days = json_conf['days_labels'];
+    weekdays = json_conf['weekdays_labels'];
+    stats_detail = json_conf['right_panel_stats_detail'];
     
     }
     
@@ -29129,13 +29163,13 @@ function displayDetails() {
 
     trips = Math.round(trips / 100) * 100;
 
-    if (!trips) return;
+    //if (!trips) return;
 
 
     // Build 1st line
     app.details1 = weekdays[day] + (index ? ' at ' + hourLabels[index - 1] : '') + ':';
     // Build 2nd line
-    app.details2 = trips.toLocaleString() + " energy used by " + detailsfordir[chosenDir];
+    app.details2 = trips.toLocaleString() + stats_detail + detailsfordir[chosenDir];
   } catch (error) {
     //eh, no big deal //console.log(error);
   }
@@ -29310,13 +29344,19 @@ var app = new Vue({
     sliderValue: 0,
     timeSlider: timeSlider,
     day: 0,
-    days: ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'],
+    days: [],
     details1: '',
     details2: '',
     nowMoloading: true,
     isAllDay: true,
     btn_pickups: '',
-    btn_dropoffs: ''
+    btn_dropoffs: '',    
+    right_panel_title: '',
+    right_panel_choose_mode: '',
+    right_panel_choose_day: '',
+    right_panel_stats_tittle: '',    
+    right_panel_footer: ''
+
   },
   watch: {
     sliderValue: function sliderValue(value) {
@@ -29348,7 +29388,9 @@ var app = new Vue({
 var helpPanel = new Vue({
   el: '#helpbox',
   data: {
-    showHelp: cookieShowHelp == undefined
+    showHelp: cookieShowHelp == undefined,
+    modal_title: '',
+    modal_content: ''
   },
   methods: {
     clickToggleHelp: clickToggleHelp
