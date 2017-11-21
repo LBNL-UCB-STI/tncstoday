@@ -28791,10 +28791,41 @@ function updateLabels(json_conf) {
     app.days = json_conf['days_labels'];
     weekdays = json_conf['weekdays_labels'];
     stats_detail = json_conf['right_panel_stats_detail'];
-    
+
+    if(json_conf['colors_ramp']){
+        updateColorsJson(json_conf['colors_ramp']);  
     }
+}
     
 
+}
+
+function updateColorsJson(colors){
+    if (colors.length == 2){
+
+        var colorAutomated = d3.scale.linear().domain([1,20])
+            .interpolate(d3.interpolateHcl)
+            .range([d3.rgb(colors[0]), d3.rgb(colors[1])]);
+
+
+        for (var i = 0; i < 20; i++) {
+        colorRamp1[i][1] = colorAutomated(i+1);
+        }
+
+
+
+    }
+    else if (colors.length == 20){
+
+        for (var i = 0; i < colors.length; i++) {
+        colorRamp1[i][1] = colors[i];
+        }
+
+    }
+    else {
+        console.log("Invalid Range Json Color SCALE");
+    }
+    
 }
 
 
